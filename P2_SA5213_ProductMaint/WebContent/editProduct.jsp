@@ -5,10 +5,21 @@
 <head>
 <meta charset="UTF-8">
 <title>Edit Product</title>
+<style>
+
+.inputError {
+	width: 250px;
+	background-color: red;
+}
+
+
+</style>
+
 </head>
 <body>
 
 	<h2>Edit Product</h2>
+	<div class="inputError">${inputError}</div>
 
 	<form action="update">
 

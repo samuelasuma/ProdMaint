@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-    <wb-module deploy-name="P2_SA5213_ProductMaint">
+        
+    <wb-module deploy-name="P3_SA5213_ProductMaint">
+                
         <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
+                
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
-        <property name="context-root" value="P2_SA5213_ProductMaint"/>
-        <property name="java-output-path" value="/P2_SA5213_ProductMaint/build/classes"/>
+                
+        <property name="java-output-path" value="/P3_SA5213_ProductMaint/build/classes"/>
+        <property name="context-root" value="P3_SA5213_ProductMaint"/>
+            
     </wb-module>
+    
 </project-modules>

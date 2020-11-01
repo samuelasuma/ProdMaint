@@ -4,12 +4,14 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Feature Under Construction</title>
+<title>Insert title here</title>
 </head>
 <body>
+<h1>Product not found </h1>
 
-<h1>Under Construction</h1>
-<p>Feature under construction please check back soon</p>
+<form action="landing">
+<input type="submit" value="Back"></input>
+</form>
 
 </body>
 </html>

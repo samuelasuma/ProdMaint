@@ -33,7 +33,7 @@
 							name="releaseDate" value="${product.releaseDate}"></label></td>
 				</tr>
 				<tr>
-					<td><input type="submit" name="action" value="Delete" id="button-1" /></td>
+					<td><input type="submit" name="action" value="Confirm Delete" id="button-1" onclick="return confirm('Are you sure you want to delete?')"/></td>
 					<td><input type="submit" name="action" value="Cancel"
 						id="button-1" /></td>
 					<td><input type="reset" name="action" value="Reset" id="button-1" /></td>

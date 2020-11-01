@@ -64,7 +64,7 @@
 
 			<tr>
 
-				<td><input type="submit" value="Add" id="button-1" /></td>
+				<td><input type="submit" name="action" value="Add" id="button-1" /></td>
 				<td><input type="submit" name="action" value="Cancel"
 					id="button-1" /></td>
 				<td><input type="reset" value="Reset" id="button-1" /></td>
