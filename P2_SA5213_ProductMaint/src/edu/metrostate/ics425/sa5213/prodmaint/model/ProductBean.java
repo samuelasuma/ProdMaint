@@ -33,8 +33,20 @@ public class ProductBean implements Serializable, Product {
 		this.price = price;
 		this.releaseDate = releaseDate;
 	}
+	
+	public ProductBean( String description, Double price, LocalDate releaseDate) {
+		
+		
+		this.description = description;
+		this.price = price;
+		this.releaseDate = releaseDate;
+	}
 
 	
+
+	public ProductBean(String productCode) {
+		this.prouductCode = productCode;
+	}
 
 	@Override
 	public String getDescription() {

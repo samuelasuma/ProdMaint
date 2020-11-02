@@ -37,7 +37,7 @@
 	<div class="inputError">${inputError}</div>
 	<div class="dateError">${dateError}</div>
 	<div class="priceError">${priceError}</div>
-	<form action="landing">
+	<form action="landing" method="post">
 
 		<table>
 

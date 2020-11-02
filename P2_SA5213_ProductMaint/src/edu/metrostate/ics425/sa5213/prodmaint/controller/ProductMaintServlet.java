@@ -1,6 +1,5 @@
 package edu.metrostate.ics425.sa5213.prodmaint.controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -15,8 +14,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import edu.metrostate.ics425.prodmaint.data.CatalogException;
-import edu.metrostate.ics425.prodmaint.data.ProductCatalog;
+import edu.metrostate.ics425.sa5213.prodmaint.db.ProductCatalog;
 import edu.metrostate.ics425.sa5213.prodmaint.model.ProductBean;
+import edu.metrostate.ics425.sa5213.prodmaint.controller.DateValidator;
 
 /**
  * Servlet implementation class ProductMaintServlet
@@ -25,7 +25,7 @@ import edu.metrostate.ics425.sa5213.prodmaint.model.ProductBean;
 public class ProductMaintServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	ProductCatalog<ProductBean> catalog;
+	ProductCatalog catalog = ProductCatalog.getInstance();
 
 	/**
 	 * Default constructor.
@@ -33,25 +33,6 @@ public class ProductMaintServlet extends HttpServlet {
 	public ProductMaintServlet() {
 		super();
 
-	}
-
-	@Override
-	public void init() throws ServletException {
-		// TODO Auto-generated method stub
-		super.init();
-		var sc = getServletContext();
-		var virtualCatalogPath = "/WEB-INF/catalog/demoCatalog.db";
-		var absoluteCatalogFilePath = sc.getRealPath(virtualCatalogPath);
-		log("Absolute Path: " + absoluteCatalogFilePath);
-		try {
-			var catalogFile = new File(absoluteCatalogFilePath);
-			catalog = new ProductCatalog<ProductBean>(catalogFile.getAbsolutePath());
-
-			sc.setAttribute("catalog", catalog);
-		} catch (CatalogException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	/**
@@ -127,6 +108,7 @@ public class ProductMaintServlet extends HttpServlet {
 	 *                          then redirects user to product page or user has
 	 *                          option to cancel or reset.
 	 */
+
 	private void landing(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException, CatalogException {
 
@@ -146,8 +128,6 @@ public class ProductMaintServlet extends HttpServlet {
 
 			// Input Validation
 
-			
-
 			if (productCode == null || productCode == "" && description == null || description == "") {
 				final String inputError = "Product Code and Descritption cannot be left blank";
 				request.setAttribute("inputError", inputError);
@@ -165,14 +145,13 @@ public class ProductMaintServlet extends HttpServlet {
 						request.setAttribute("inputError", inputError);
 
 						request.getRequestDispatcher("/addProduct.jsp").forward(request, response);
-					}else {
+					} else {
 						// Create product object and add to products list
 						ProductBean product = new ProductBean(productCode, description, Double.parseDouble(price),
 								LocalDate.parse(releaseDate));
 
 						// Add products to catalog if no errors
 
-						log("catalog: " + catalog);
 						if (catalog.exists(product.getProductCode())) {
 							final String errMsg = String.format("Product %s exists", productCode);
 							log(errMsg);
@@ -182,28 +161,26 @@ public class ProductMaintServlet extends HttpServlet {
 
 						} else {
 							catalog.insert(product);
+							request.setAttribute("products", catalog.selectAll());
+
+							request.getRequestDispatcher("/landing.jsp").forward(request, response);
 
 						}
-						
+
 					}
 
-				
 				}
-				
-				
 
 			}
 
 		}
 
-		request.setAttribute("products", catalog.selectAll());
-
-		request.getRequestDispatcher("/landing.jsp").forward(request, response);
+		
 	}
 
 	/**
 	 * @param request
-	 * @param response
+	 * @param responsexf
 	 * @throws ServletException
 	 * @throws IOException
 	 * @throws CatalogException
@@ -246,20 +223,17 @@ public class ProductMaintServlet extends HttpServlet {
 			throws ServletException, IOException, CatalogException {
 
 		var productCode = request.getParameter("productCode");
-		System.out.println(productCode);
-
-		ProductBean existProduct;
 
 		if (productCode != null && catalog.exists(productCode)) {
-			existProduct = catalog.select(productCode);
+			var existProduct = catalog.select(productCode);
 			request.setAttribute("product", existProduct);
+			request.getRequestDispatcher("/editProduct.jsp").forward(request, response);
 		} else {
 
 			request.getRequestDispatcher("/productError.jsp").forward(request, response);
 
 		}
 
-		request.getRequestDispatcher("/editProduct.jsp").forward(request, response);
 	}
 
 	/**
@@ -274,20 +248,17 @@ public class ProductMaintServlet extends HttpServlet {
 			throws ServletException, IOException, CatalogException {
 
 		var productCode = request.getParameter("productCode");
-		System.out.println(productCode);
-
-		ProductBean existProduct;
 
 		if (productCode != null && catalog.exists(productCode)) {
-			existProduct = catalog.select(productCode);
+			var existProduct = catalog.select(productCode);
 			request.setAttribute("product", existProduct);
+			request.getRequestDispatcher("/deleteProduct.jsp").forward(request, response);
 		} else {
 
 			request.getRequestDispatcher("/productError.jsp").forward(request, response);
 
 		}
 
-		request.getRequestDispatcher("/deleteProduct.jsp").forward(request, response);
 	}
 
 	/**
@@ -320,13 +291,10 @@ public class ProductMaintServlet extends HttpServlet {
 			var description = request.getParameter("description");
 			var price = request.getParameter("price");
 			var releaseDate = request.getParameter("releaseDate");
-			
-			
-			
+
 			if (productCode != null && description != null && price != null && releaseDate != null
 					&& catalog.exists(productCode)) {
-				
-				
+
 				if (price == "" || releaseDate == "") {
 					final String inputError = "Price and Release cannot be left blank";
 					request.setAttribute("inputError", inputError);
@@ -336,7 +304,6 @@ public class ProductMaintServlet extends HttpServlet {
 				ProductBean product = new ProductBean(productCode, description, Double.parseDouble(price),
 						LocalDate.parse(releaseDate));
 				catalog.update(product);
-				System.out.println(catalog.selectAll());
 
 			} else {
 				request.getRequestDispatcher("/productError.jsp").forward(request, response);
@@ -372,12 +339,12 @@ public class ProductMaintServlet extends HttpServlet {
 
 				catalog.delete(productCode);
 				log("Product Deleted: " + productCode);
+				request.setAttribute("products", catalog.selectAll());
+				request.getRequestDispatcher("/landing.jsp").forward(request, response);
 			}
 
 		}
-		request.setAttribute("products", catalog.selectAll());
 
-		request.getRequestDispatcher("/landing.jsp").forward(request, response);
 	}
 
 	/**
@@ -390,13 +357,13 @@ public class ProductMaintServlet extends HttpServlet {
 		try {
 			processRequest(request, response);
 		} catch (ServletException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		} catch (CatalogException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 
@@ -411,13 +378,13 @@ public class ProductMaintServlet extends HttpServlet {
 		try {
 			processRequest(request, response);
 		} catch (ServletException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		} catch (CatalogException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 
@@ -429,25 +396,12 @@ public class ProductMaintServlet extends HttpServlet {
 		DateValidator validator = new DateValidatorUsingDateTimeFormatter(dateFormatter);
 		LocalDate now = LocalDate.now();
 		LocalDate userDate = LocalDate.parse(releaseDate);
-		
+
 		if (!validator.isValid(releaseDate) || userDate.isAfter(now)) {
 			return false;
 		}
-		
-		
+
 		return true;
-	}
-
-	public void isValidPrice() {
-
-	}
-
-	public void isValidProductCode() {
-
-	}
-
-	public void isValidDescription() {
-
 	}
 
 	/**
@@ -461,7 +415,6 @@ public class ProductMaintServlet extends HttpServlet {
 			this.dateFormatter = dateFormatter;
 		}
 
-		@Override
 		public boolean isValid(String dateStr) {
 			try {
 				this.dateFormatter.parse(dateStr);
